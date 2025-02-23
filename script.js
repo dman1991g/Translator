@@ -1,48 +1,20 @@
-// 1. Speech-to-Text (STT) - Converts speech to text
-function startSpeechRecognition() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = document.getElementById("targetLang").value; // Set language dynamically
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onresult = (event) => {
-        document.getElementById("inputText").value = event.results[0][0].transcript;
-    };
-
-    recognition.onerror = (event) => {
-        alert("Speech recognition error: " + event.error);
-    };
-
-    recognition.start();
-}
-
-// 2. Text-to-Speech (TTS) - Reads the translated text aloud
-function speakText() {
-    let text = document.getElementById("outputText").innerText;
-    let targetLang = document.getElementById("targetLang").value;
-
-    if (!text) {
-        alert("No text to speak.");
-        return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = targetLang; // Set language for speech
-    window.speechSynthesis.speak(utterance);
-}
-
-// 3. Translation Function - Uses LibreTranslate, with Lingva as fallback
 async function translateText() {
-    let text = document.getElementById("inputText").value;
+    let text = document.getElementById("inputText").value.trim();
     let targetLang = document.getElementById("targetLang").value;
+    let output = document.getElementById("outputText");
 
     if (!text) {
         alert("Please enter text to translate.");
         return;
     }
 
+    console.log("Text to translate:", text);
+    console.log("Target language:", targetLang);
+
+    // CORS workaround for LibreTranslate
     try {
-        let response = await fetch("https://libretranslate.de/translate", {
+        console.log("Trying LibreTranslate...");
+        let response = await fetch("https://cors-anywhere.herokuapp.com/https://libretranslate.de/translate", {
             method: "POST",
             body: JSON.stringify({
                 q: text,
@@ -53,26 +25,36 @@ async function translateText() {
             headers: { "Content-Type": "application/json" }
         });
 
-        if (!response.ok) {
-            throw new Error("LibreTranslate failed, trying Lingva...");
-        }
+        console.log("LibreTranslate HTTP Status:", response.status);
 
         let data = await response.json();
-        document.getElementById("outputText").innerText = data.translatedText;
-    } catch (error) {
-        console.warn(error.message);
-        // Fallback to Lingva
-        try {
-            let lingvaResponse = await fetch(`https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`);
-            let lingvaData = await lingvaResponse.json();
-            document.getElementById("outputText").innerText = lingvaData.translation;
-        } catch (fallbackError) {
-            alert("Translation service is unavailable. Please try again later.");
-        }
-    }
-}
+        console.log("LibreTranslate Response:", data);
 
-// 4. Event Listeners for Button Clicks
-document.getElementById("speakButton").addEventListener("click", startSpeechRecognition);
-document.getElementById("listenButton").addEventListener("click", speakText);
-document.getElementById("translateButton").addEventListener("click", translateText);
+        if (data.translatedText) {
+            output.innerText = data.translatedText;
+            return;
+        }
+    } catch (error) {
+        console.error("LibreTranslate Error:", error);
+    }
+
+    // Fallback to Lingva Translate
+    try {
+        console.log("Trying Lingva Translate...");
+        let lingvaResponse = await fetch(`https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`);
+        
+        console.log("Lingva HTTP Status:", lingvaResponse.status);
+
+        let lingvaData = await lingvaResponse.json();
+        console.log("Lingva Translate Response:", lingvaData);
+
+        if (lingvaData.translation) {
+            output.innerText = lingvaData.translation;
+            return;
+        }
+    } catch (error) {
+        console.error("Lingva Translate Error:", error);
+    }
+
+    output.innerText = "Translation unavailable.";
+}
