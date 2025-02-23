@@ -2,7 +2,7 @@
     "name": "Translator PWA",
     "short_name": "Translator",
     "description": "A simple text translator with speech recognition.",
-    ""start_url": "https://dman1991g.github.io/Translator/index.html",
+    "start_url": "https://dman1991g.github.io/Translator/index.html",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#007bff",
