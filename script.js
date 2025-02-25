@@ -2,22 +2,23 @@ async function translateText() {
     let text = document.getElementById("inputText").value.trim();
     let targetLang = document.getElementById("targetLang").value;
     let output = document.getElementById("outputText");
-    let errorDisplay = document.getElementById("errorDisplay");
 
     if (!text) {
-        errorDisplay.innerText = "Please enter text to translate.";
+        alert("Please enter text to translate.");
         return;
     }
 
-    errorDisplay.innerText = "";  // Clear previous errors
+    alert("Text to translate: " + text);
+    alert("Target language: " + targetLang);
 
     // CORS workaround for LibreTranslate
     try {
+        alert("Trying LibreTranslate...");
         let response = await fetch("https://cors-anywhere.herokuapp.com/https://libretranslate.de/translate", {
             method: "POST",
             body: JSON.stringify({
                 q: text,
-                source: "auto",  // Auto-detect source language
+                source: "auto",
                 target: targetLang,
                 format: "text"
             }),
@@ -25,31 +26,30 @@ async function translateText() {
         });
 
         let data = await response.json();
+        alert("LibreTranslate Response: " + JSON.stringify(data));
 
         if (data.translatedText) {
             output.innerText = data.translatedText;
             return;
-        } else {
-            errorDisplay.innerText = "Error: Translation failed (LibreTranslate).";
         }
     } catch (error) {
-        errorDisplay.innerText = "Error: " + error.message;
+        alert("LibreTranslate Error: " + error);
     }
 
     // Fallback to Lingva Translate
     try {
+        alert("Trying Lingva Translate...");
         let lingvaResponse = await fetch(`https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`);
         
         let lingvaData = await lingvaResponse.json();
+        alert("Lingva Translate Response: " + JSON.stringify(lingvaData));
 
         if (lingvaData.translation) {
             output.innerText = lingvaData.translation;
             return;
-        } else {
-            errorDisplay.innerText = "Error: Translation failed (Lingva).";
         }
     } catch (error) {
-        errorDisplay.innerText = "Error: " + error.message;
+        alert("Lingva Translate Error: " + error);
     }
 
     output.innerText = "Translation unavailable.";
