@@ -14,7 +14,7 @@ async function translateText() {
     // CORS workaround for LibreTranslate
     try {
         alert("Trying LibreTranslate...");
-        let response = await fetch("https://cors-anywhere.herokuapp.com/https://libretranslate.de/translate", {
+        let response = await fetch("https://libretranslate.de/translate", {
             method: "POST",
             body: JSON.stringify({
                 q: text,
