@@ -1,19 +1,14 @@
 async function translateText() {
-    let text = document.getElementById("inputText").value.trim();
+    let text = document.getElementById("inputText").value;
     let targetLang = document.getElementById("targetLang").value;
-    let output = document.getElementById("outputText");
 
     if (!text) {
         alert("Please enter text to translate.");
         return;
     }
 
-    alert("Text to translate: " + text);
-    alert("Target language: " + targetLang);
-
-    // CORS workaround for LibreTranslate
     try {
-        alert("Trying LibreTranslate...");
+        // First attempt: Use LibreTranslate
         let response = await fetch("https://libretranslate.de/translate", {
             method: "POST",
             body: JSON.stringify({
@@ -25,32 +20,24 @@ async function translateText() {
             headers: { "Content-Type": "application/json" }
         });
 
+        if (!response.ok) throw new Error("LibreTranslate failed");
+
         let data = await response.json();
-        alert("LibreTranslate Response: " + JSON.stringify(data));
-
-        if (data.translatedText) {
-            output.innerText = data.translatedText;
-            return;
-        }
+        document.getElementById("outputText").innerText = data.translatedText;
     } catch (error) {
-        alert("LibreTranslate Error: " + error);
-    }
+        console.warn("LibreTranslate failed, switching to Lingva...", error);
 
-    // Fallback to Lingva Translate
-    try {
-        alert("Trying Lingva Translate...");
-        let lingvaResponse = await fetch(`https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`);
-        
-        let lingvaData = await lingvaResponse.json();
-        alert("Lingva Translate Response: " + JSON.stringify(lingvaData));
+        // Fallback: Use Lingva Translate
+        try {
+            let lingvaResponse = await fetch(`https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`);
+            
+            if (!lingvaResponse.ok) throw new Error("Lingva failed");
 
-        if (lingvaData.translation) {
-            output.innerText = lingvaData.translation;
-            return;
+            let lingvaData = await lingvaResponse.json();
+            document.getElementById("outputText").innerText = lingvaData.translation;
+        } catch (fallbackError) {
+            console.error("Both LibreTranslate and Lingva failed", fallbackError);
+            document.getElementById("outputText").innerText = "Translation unavailable.";
         }
-    } catch (error) {
-        alert("Lingva Translate Error: " + error);
     }
-
-    output.innerText = "Translation unavailable.";
 }
