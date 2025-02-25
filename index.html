@@ -6,31 +6,29 @@
     <title>Free Translator PWA</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    <script src="script.js"></script>
 </head>
 <body>
     <h1>Text Translator</h1>
 
     <textarea id="inputText" placeholder="Enter text to translate..."></textarea>
 
-    <select id="targetLang">
-        <option value="en">English</option>
-        <option value="es">Spanish</option>
-        <option value="fr">French</option>
-        <option value="de">German</option>
-        <option value="hi">Hindi</option>
-        <option value="zh">Chinese</option>
-        <option value="my">Burmese</option>
-        <option value="pa">Punjabi</option>
-        <option value="ht">Haitian Creole</option>
-    </select>
+  <select id="targetLang">
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+    <option value="hi">Hindi</option>
+    <option value="zh">Chinese</option>
+    <option value="my">Burmese</option>
+    <option value="pa">Punjabi</option>
+    <option value="ht">Haitian Creole</option>
+</select>
 
-    <button id="translateButton">Translate</button>
+    <button onclick="translateText()">Translate</button>
 
     <h2>Translated Text:</h2>
     <p id="outputText"></p>
 
-    <script src="script.js"></script>
-    
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
