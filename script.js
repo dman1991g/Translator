@@ -1,5 +1,3 @@
-Here is the JavaScript 
-
 async function translateText() {
     let text = document.getElementById("inputText").value.trim();
     let targetLang = document.getElementById("targetLang").value;
