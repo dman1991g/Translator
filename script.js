@@ -1,3 +1,44 @@
+// Check if the browser supports SpeechRecognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US'; // Default language
+    recognition.interimResults = false; // Only return final results
+
+    const micButton = document.getElementById("micButton");
+    const inputField = document.getElementById("inputText");
+
+    micButton.addEventListener("click", () => {
+        micButton.innerText = "🎤 Listening...";
+        micButton.style.backgroundColor = "#ff5555"; // Change color while listening
+        recognition.start();
+    });
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        inputField.value = transcript; // Insert spoken text into input field
+        micButton.innerText = "🎤 Speak";
+        micButton.style.backgroundColor = ""; // Reset color
+        translateText(); // Auto-translate after speech input
+    };
+
+    recognition.onspeechend = () => {
+        recognition.stop();
+        micButton.innerText = "🎤 Speak";
+        micButton.style.backgroundColor = ""; // Reset color
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        micButton.innerText = "🎤 Speak";
+        micButton.style.backgroundColor = ""; // Reset color
+    };
+} else {
+    console.warn("SpeechRecognition API is not supported in this browser.");
+}
+
+// Function to translate text
 async function translateText() {
     let text = document.getElementById("inputText").value.trim();
     let targetLang = document.getElementById("targetLang").value;
