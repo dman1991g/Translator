@@ -2,21 +2,22 @@ async function translateText() {
     let text = document.getElementById("inputText").value.trim();
     let targetLang = document.getElementById("targetLang").value;
     let output = document.getElementById("outputText");
+    let errorDisplay = document.getElementById("errorDisplay");
 
     if (!text) {
-        alert("Please enter text to translate.");
+        errorDisplay.innerText = "Please enter text to translate.";
         return;
     }
 
-    alert("Text: " + text + "\nLanguage: " + targetLang);
+    errorDisplay.innerText = "";  // Clear previous errors
 
-    // **Primary Translation: LibreTranslate**
+    // CORS workaround for LibreTranslate
     try {
-        let response = await fetch("https://libretranslate.de/translate", {
+        let response = await fetch("https://cors-anywhere.herokuapp.com/https://libretranslate.de/translate", {
             method: "POST",
             body: JSON.stringify({
                 q: text,
-                source: "auto", // Auto-detects input language
+                source: "auto",  // Auto-detect source language
                 target: targetLang,
                 format: "text"
             }),
@@ -24,42 +25,32 @@ async function translateText() {
         });
 
         let data = await response.json();
-        alert("LibreTranslate API Response: " + JSON.stringify(data));
 
         if (data.translatedText) {
             output.innerText = data.translatedText;
-            alert("Translation Successful (LibreTranslate): " + data.translatedText);
             return;
+        } else {
+            errorDisplay.innerText = "Error: Translation failed (LibreTranslate).";
         }
     } catch (error) {
-        alert("LibreTranslate failed, trying Lingva Translate...\nError: " + error);
+        errorDisplay.innerText = "Error: " + error.message;
     }
 
-    // **Fallback: Lingva Translate**
+    // Fallback to Lingva Translate
     try {
         let lingvaResponse = await fetch(`https://lingva.ml/api/v1/en/${targetLang}/${encodeURIComponent(text)}`);
-
+        
         let lingvaData = await lingvaResponse.json();
-        alert("Lingva Translate API Response: " + JSON.stringify(lingvaData));
 
         if (lingvaData.translation) {
             output.innerText = lingvaData.translation;
-            alert("Translation Successful (Lingva): " + lingvaData.translation);
             return;
+        } else {
+            errorDisplay.innerText = "Error: Translation failed (Lingva).";
         }
     } catch (error) {
-        alert("Lingva Translate also failed. Error: " + error);
+        errorDisplay.innerText = "Error: " + error.message;
     }
 
     output.innerText = "Translation unavailable.";
 }
-
-// Ensure the button works even if inline `onclick` fails
-document.addEventListener("DOMContentLoaded", function () {
-    let translateButton = document.getElementById("translateButton");
-    if (translateButton) {
-        translateButton.addEventListener("click", translateText);
-    } else {
-        alert("Translate button not found!");
-    }
-});
