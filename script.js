@@ -1,21 +1,3 @@
-async function detectLanguage(text) {
-    let detectURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|en`;
-
-    try {
-        let response = await fetch(detectURL);
-        let data = await response.json();
-
-        if (data?.responseData?.detectedSourceLanguage) {
-            return data.responseData.detectedSourceLanguage; // Return the detected language code
-        } else {
-            throw new Error("Language detection failed.");
-        }
-    } catch (error) {
-        console.error("❌ Language detection failed.", error);
-        return null;
-    }
-}
-
 async function translateText() {
     let text = document.getElementById("inputText")?.value.trim();
     let targetLang = document.getElementById("targetLang")?.value;
@@ -26,21 +8,10 @@ async function translateText() {
         return;
     }
 
-    // Step 1: Detect the language
-    let detectedLang = await detectLanguage(text);
-
-    if (!detectedLang) {
-        outputElement.innerText = "⚠️ Unable to detect language.";
-        return;
-    }
-
-    console.log("Detected language:", detectedLang);
-
-    // Step 2: Translate the text using the detected language
-    let translateURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${detectedLang}|${targetLang}`;
+    let myMemoryURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
 
     try {
-        let response = await fetch(translateURL);
+        let response = await fetch(myMemoryURL);
         let data = await response.json();
 
         if (data?.responseData?.translatedText) {
