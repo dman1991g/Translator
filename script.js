@@ -8,7 +8,7 @@ async function translateText() {
         return;
     }
 
-    let myMemoryURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+    let myMemoryURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|${targetLang}`;
 
     try {
         let response = await fetch(myMemoryURL);
