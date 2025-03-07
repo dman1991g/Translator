@@ -1,14 +1,3 @@
-async function detectLanguage(text) {
-    let response = await fetch("https://libretranslate.de/detect", {
-        method: "POST",
-        body: JSON.stringify({ q: text }),
-        headers: { "Content-Type": "application/json" }
-    });
-
-    let data = await response.json();
-    return data?.[0]?.language || "en"; // Default to English if detection fails
-}
-
 async function translateText() {
     let text = document.getElementById("inputText")?.value.trim();
     let targetLang = document.getElementById("targetLang")?.value;
@@ -19,17 +8,9 @@ async function translateText() {
         return;
     }
 
+    let myMemoryURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+
     try {
-        let detectedLang = await detectLanguage(text);
-        console.log("Detected language:", detectedLang);
-
-        if (detectedLang === targetLang) {
-            outputElement.innerText = "⚠️ The input and target languages are the same.";
-            return;
-        }
-
-        let myMemoryURL = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${detectedLang}|${targetLang}`;
-
         let response = await fetch(myMemoryURL);
         let data = await response.json();
 
@@ -39,7 +20,7 @@ async function translateText() {
             throw new Error("MyMemory API returned an invalid response.");
         }
     } catch (error) {
-        console.error("❌ Translation error:", error);
+        console.error("❌ MyMemory translation failed.", error);
         outputElement.innerText = "⚠️ Translation failed. Try again later.";
     }
 }
